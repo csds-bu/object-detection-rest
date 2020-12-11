@@ -1,15 +1,21 @@
-import os
-from api import create_app
+import json
+from flask import Flask, jsonify, request
+from prediction import predict
 
-application = create_app(__name__)
-
-
-if __name__ == "__main__":
-    host = os.getenv('HOST') or '0.0.0.0'
-    port = os.getenv('PORT') or '8080'
-    application.run(host=host, port=port)
+application = Flask(__name__)
 
 
-@application.shell_context_processor
-def make_shell_context():
-    return {}
+@application.route('/')
+@application.route('/status')
+def status():
+    return jsonify({
+        'status': 'ok',
+        'version': '1.0.0.0'
+    })
+
+
+@application.route('/prediction', methods=['POST'])
+def object_detection():
+    data = request.data or '{}'
+    body = json.loads(data)
+    return jsonify(predict(body))
